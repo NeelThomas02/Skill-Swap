@@ -1,0 +1,19 @@
+{# templates/users/profile.html #}
+{% extends "base.html" %}
+{% block content %}
+  <div class="card mb-4">
+    <div class="card-body">
+      <h3 class="card-title">Hello, {{ object.user.username }}!</h3>
+      <p><strong>Email:</strong> {{ object.user.email }}</p>
+      <p><strong>Bio:</strong> {{ object.bio|default:"(none)" }}</p>
+      <p>
+        <strong>Offered Skills:</strong><br>
+        {% for skill in object.skills.all %}
+          <span class="badge bg-secondary me-1">{{ skill.name }}</span>
+        {% empty %}
+          <em>No skills yet.</em>
+        {% endfor %}
+      </p>
+    </div>
+  </div>
+{% endblock %}
