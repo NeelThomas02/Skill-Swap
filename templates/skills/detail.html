@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2 class="mb-4">{{ skill.name }}</h2>
+
+  {% if holders %}
+    <div class="list-group">
+      {% for holder in holders %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ holder.user.username }}</strong>
+            <p class="mb-0 text-muted">{{ holder.bio|truncatechars:50 }}</p>
+          </div>
+          <div>
+            {% if holder.pk in mutual_helpers %}
+              <span class="badge bg-success">Matched</span>
+              <a href="{% url 'chat:list' %}" class="btn btn-sm btn-primary ms-2">Chat</a>
+            {% elif holder.pk in requested_helpers %}
+              <button class="btn btn-sm btn-secondary" disabled>Requested</button>
+            {% else %}
+              <form method="post" action="{% url 'skills:request' skill.pk holder.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-primary">Request Help</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No one is offering this skill yet.</p>
+  {% endif %}
+{% endblock %}

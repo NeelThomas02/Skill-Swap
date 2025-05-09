@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2 class="mb-4">Your Mutual Matches</h2>
+
+  {% if mutual_matches %}
+    <ul class="list-group">
+      {% for match in mutual_matches %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ match.helper.user.username }}</strong>
+            for <em>{{ match.skill.name }}</em>
+          </div>
+          <a href="{% url 'chat:list' %}" class="btn btn-sm btn-primary">Chat</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have no mutual matches yet.</p>
+  {% endif %}
+{% endblock %}

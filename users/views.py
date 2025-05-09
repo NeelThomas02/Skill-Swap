@@ -16,11 +16,12 @@ class SignUpView(generic.CreateView):
     template_name = 'users/signup.html'
     success_url = reverse_lazy('users:login')  # redirect to login after signup
     def form_valid(self, form):
-       # first create the User...
-       response = super().form_valid(form)
-       # ...then ensure they have a Profile
-       Profile.objects.create(user=self.object)
-       return 
+       # 1) Let CreateView save the new User and build its HttpResponseRedirect
+        response = super().form_valid(form)
+        # 2) Create the associated Profile
+        Profile.objects.create(user=self.object)
+        # 3) Return the redirect response so the view completes properly
+        return response
 
 class ProfileView(LoginRequiredMixin, generic.DetailView):
     model = Profile
