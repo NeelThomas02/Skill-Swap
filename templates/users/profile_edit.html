@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title mb-4 text-center">Edit Your Profile</h4>
+        <form method="post">
+          {% csrf_token %}
+          
+          {# Bio field (already has form-control) #}
+          <div class="mb-3">
+            {{ form.bio.label_tag }}
+            {{ form.bio }}
+            {% if form.bio.help_text %}
+              <small class="form-text text-muted">{{ form.bio.help_text }}</small>
+            {% endif %}
+          </div>
+          
+          {# Skills checkboxes (inputs already carry form-check-input) #}
+          <div class="mb-3">
+            <label class="form-label">{{ form.skills.label }}</label>
+            <div>
+              {% for checkbox in form.skills %}
+                <div class="form-check">
+                  {{ checkbox.tag }}
+                  <label
+                    class="form-check-label"
+                    for="{{ checkbox.id_for_label }}">
+                    {{ checkbox.choice_label }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+            {% if form.skills.help_text %}
+              <small class="form-text text-muted">{{ form.skills.help_text }}</small>
+            {% endif %}
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -8,6 +8,8 @@ from django.shortcuts import render
 from .forms import CustomUserCreationForm
 from django.contrib.auth.views import LogoutView
 from .models import Profile
+from django.views import generic
+from .forms import ProfileForm
 
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
@@ -32,3 +34,14 @@ class ProfileView(LoginRequiredMixin, generic.DetailView):
 class LogoutOnGetView(LogoutView):
     http_method_names = ['get', 'post']
     next_page = 'users:login'   # or wherever you want to redirect
+
+class ProfileUpdateView(LoginRequiredMixin, generic.UpdateView):
+    model = Profile
+    form_class = ProfileForm
+    template_name = 'users/profile_edit.html'
+    success_url = reverse_lazy('users:profile')
+
+    def get_object(self):
+        # Ensure a Profile always exists
+        profile, _ = Profile.objects.get_or_create(user=self.request.user)
+        return profile

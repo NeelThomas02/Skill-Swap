@@ -4,6 +4,9 @@
   <div class="card mb-4">
     <div class="card-body">
       <h3 class="card-title">Hello, {{ object.user.username }}!</h3>
+      <a href="{% url 'users:profile_edit' %}" class="btn btn-sm btn-outline-secondary ms-2">
+        Edit Profile
+      </a>
       <p><strong>Email:</strong> {{ object.user.email }}</p>
       <p><strong>Bio:</strong> {{ object.bio|default:"(none)" }}</p>
       <p>

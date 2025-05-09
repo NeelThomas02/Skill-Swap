@@ -3,6 +3,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 from .views import LogoutOnGetView
+from .views import ProfileUpdateView
 
 app_name = 'users'
 
@@ -15,4 +16,5 @@ urlpatterns = [
     # profile detail
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('logout/', LogoutOnGetView.as_view(), name='logout'),
+    path('profile/edit/', ProfileUpdateView.as_view(), name='profile_edit'),
 ]
