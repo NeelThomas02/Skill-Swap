@@ -33,6 +33,44 @@
         <div class="collapse navbar-collapse" id="navMenu">
           <ul class="navbar-nav ms-auto">
             {% if request.user.is_authenticated %}
+              <li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle position-relative"
+     href="#" id="notifDropdown" role="button"
+     data-bs-toggle="dropdown" aria-expanded="false">
+    🔔
+    {% if unread_notifications %}
+      <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+        {{ unread_notifications.count }}
+      </span>
+    {% endif %}
+  </a>
+
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifDropdown">
+    {% if unread_notifications %}
+      {% for n in unread_notifications %}
+        <li>
+          <a class="dropdown-item" href="#">
+            {{ n.message|truncatechars:50 }}<br>
+            <small class="text-muted">{{ n.created|date:"M j, H:i" }}</small>
+          </a>
+        </li>
+      {% endfor %}
+
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item text-center"
+           href="{% url 'notifications:mark_all_read' %}">
+          Mark all as read
+        </a>
+      </li>
+    {% else %}
+      <li class="dropdown-item text-muted">
+        No new notifications
+      </li>
+    {% endif %}
+  </ul>
+</li>
+
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
               </li>

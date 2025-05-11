@@ -7,6 +7,7 @@ from users.models import Profile
 from .models import Skill, Match
 from django.urls import reverse
 from django.contrib import messages
+from notifications.models import Notification
 
 # 1) List all skills
 class SkillListView(generic.ListView):
@@ -52,6 +53,10 @@ class RequestMatchView(LoginRequiredMixin, View):
             seeker=profile, helper=helper, skill=skill
         )
         if created:
+            Notification.objects.create(
+                user=helper.user,
+                message=f"{request.user.username} requested your help on “{skill.name}”."
+            )
             messages.success(request,
                              f"You’ve requested help from {helper.user.username}!")
         else:

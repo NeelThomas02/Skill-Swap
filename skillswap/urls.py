@@ -27,5 +27,6 @@ urlpatterns = [
     path('skills/',   include('skills.urls')),
     path('chat/',     include('chat.urls')),
     path('rep/',      include('reputation.urls')),
+    path('notifications/', include('notifications.urls')),
 ]
 
