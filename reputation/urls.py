@@ -1,10 +1,7 @@
-# reputation/urls.py
 from django.urls import path
-from . import views
+from .views import VoteView
 
 app_name = 'reputation'
-
 urlpatterns = [
-    path('vote/', views.VoteView.as_view(), name='vote'),
-    # etc…
+    path('vote/', VoteView.as_view(), name='vote'),
 ]

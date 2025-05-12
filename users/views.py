@@ -10,6 +10,7 @@ from django.contrib.auth.views import LogoutView
 from .models import Profile
 from django.views import generic
 from .forms import ProfileForm
+from django.db import models
 
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
@@ -26,11 +27,19 @@ class SignUpView(generic.CreateView):
 class ProfileView(LoginRequiredMixin, generic.DetailView):
     model = Profile
     template_name = 'users/profile.html'
-    
+
     def get_object(self):
         # get or create a Profile for the logged-in user
         profile, created = Profile.objects.get_or_create(user=self.request.user)
         return profile
+
+    def get_context_data(self, **kwargs):
+         ctx = super().get_context_data(**kwargs)
+         votes = self.object.votes.all()
+         up_count   = votes.filter(upvote=True).count()
+         down_count = votes.filter(upvote=False).count()
+         ctx['reputation_score'] = up_count - down_count
+         return ctx
 
 class LogoutOnGetView(LogoutView):
     http_method_names = ['get', 'post']
