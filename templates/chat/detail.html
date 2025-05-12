@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Chat with {{ other.user.username }}</h2>
+
+  <div class="border rounded p-3 mb-3" style="height:400px;overflow-y:auto;">
+    {% for msg in chat_messages %}
+      <div class="mb-2 {% if msg.sender == request.user.profile %}text-end{% endif %}">
+        <div class="d-inline-block p-2 rounded
+          {% if msg.sender == request.user.profile %}
+            bg-primary text-white
+          {% else %}
+            bg-secondary text-white
+          {% endif %}">
+          {{ msg.text|linebreaksbr }}
+        </div>
+        <br>
+        <small class="text-muted">{{ msg.timestamp|date:"M j, H:i" }}</small>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="input-group">
+      {{ form.text }}
+      <button class="btn btn-primary" type="submit">Send</button>
+    </div>
+  </form>
+{% endblock %}

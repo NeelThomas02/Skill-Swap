@@ -1,20 +1,19 @@
-{# templates/chat/list.html #}
 {% extends "base.html" %}
 {% block content %}
-  <h2 class="mb-4">Your Messages</h2>
-  <ul class="list-group">
-    {% for msg in messages %}
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <div>
-          <strong class="me-2">
-            {{ msg.sender.user.username }}
-          </strong>
-          {{ msg.text }}
-        </div>
-        <small class="text-muted">{{ msg.timestamp|date:"H:i, M j" }}</small>
-      </li>
-    {% empty %}
-      <li class="list-group-item">No messages yet.</li>
-    {% endfor %}
-  </ul>
+<h2>Your Chats</h2>
+<div class="list-group">
+  {% for contact in contacts %}
+    <a
+      href="{% url 'chat:detail' contact.pk %}"
+      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+    >
+      {{ contact.user.username }}
+      <!-- optionally, show last message timestamp or preview here -->
+    </a>
+  {% empty %}
+    <div class="list-group-item text-muted">
+      You have no active conversations.
+    </div>
+  {% endfor %}
+</div>
 {% endblock %}
