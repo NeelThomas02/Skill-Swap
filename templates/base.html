@@ -138,5 +138,123 @@
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-…"
     crossorigin="anonymous"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function(){
+  // Utility to get CSRF token from cookie
+  function getCookie(name) {
+    let cookieVal = null;
+    document.cookie.split(';').forEach(c => {
+      let [k,v] = c.trim().split('=');
+      if (k === name) cookieVal = decodeURIComponent(v);
+    });
+    return cookieVal;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // Helper to pull the vote endpoint from any vote-form
+  function getVoteUrl() {
+    const anyForm = document.querySelector('.vote-form');
+    return anyForm ? anyForm.action : '';
+  }
+
+  // Delegate submit on each up/down form
+  document.querySelectorAll('.vote-form').forEach(form => {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      const url = this.action;
+      const data = new FormData(this);
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: data
+      })
+      .then(r => r.json())
+      .then(json => {
+        if (!json.success) {
+          alert(json.message || 'Error casting vote.');
+          return;
+        }
+        // Update reputation badge
+        document.getElementById('reputation-score').textContent = json.score;
+
+        // Rebuild the vote‐buttons area
+        const vb = document.getElementById('vote-buttons');
+        if (json.has_voted) {
+          vb.innerHTML = `
+            <button id="undo-vote-btn" class="btn btn-sm btn-outline-warning">
+              <i class="bi bi-arrow-counterclockwise"></i> Undo Vote
+            </button>
+          `;
+          document.getElementById('undo-vote-btn')
+                  .addEventListener('click', undoVote);
+        } else {
+          vb.innerHTML = `
+            <form class="vote-form d-inline me-1" method="post" action="${url}">
+              <input type="hidden" name="csrfmiddlewaretoken" value="${csrftoken}">
+              <input type="hidden" name="profile_id" value="${data.get('profile_id')}">
+              <input type="hidden" name="value" value="1">
+              <button class="btn btn-sm btn-outline-success">
+                <i class="bi bi-hand-thumbs-up"></i>
+              </button>
+            </form>
+            <form class="vote-form d-inline" method="post" action="${url}">
+              <input type="hidden" name="csrfmiddlewaretoken" value="${csrftoken}">
+              <input type="hidden" name="profile_id" value="${data.get('profile_id')}">
+              <input type="hidden" name="value" value="-1">
+              <button class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-hand-thumbs-down"></i>
+              </button>
+            </form>
+          `;
+          // Re-bind submit handler for the new forms
+          document.querySelectorAll('.vote-form').forEach(f => {
+            f.addEventListener('submit', e => {
+              e.preventDefault();
+              f.dispatchEvent(new Event('submit', { bubbles: true }));
+            });
+          });
+        }
+      })
+      .catch(() => alert('Network error – try again.'));
+    });
+  });
+
+  // Handler for the "Undo Vote" button
+  function undoVote(e) {
+    e.preventDefault();
+    const url = getVoteUrl();
+    const profileId = document.querySelector('input[name="profile_id"]').value;
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `profile_id=${profileId}&value=0`
+    })
+    .then(r => r.json())
+    .then(json => {
+      if (!json.success) {
+        alert(json.message || 'Error undoing vote.');
+        return;
+      }
+      document.getElementById('reputation-score').textContent = json.score;
+      // reload or re-render the up/down buttons
+      location.reload();
+    })
+    .catch(() => alert('Network error – try again.'));
+  }
+
+  // On initial load, bind undo if present
+  const undoBtn = document.getElementById('undo-vote-btn');
+  if (undoBtn) undoBtn.addEventListener('click', undoVote);
+});
+</script>
 </body>
 </html>

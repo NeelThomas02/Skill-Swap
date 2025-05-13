@@ -12,6 +12,7 @@ from django.views import generic
 from .forms import ProfileForm
 from django.db import models
 from django.views.generic import DetailView
+from reputation.models import Vote
 
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
@@ -68,4 +69,10 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         up   = votes.filter(upvote=True).count()
         down = votes.filter(upvote=False).count()
         ctx['reputation_score'] = up - down
+        # Has the logged-in user already voted on this profile?
+        voter_profile = self.request.user.profile
+        ctx['has_voted'] = Vote.objects.filter(
+            profile=self.object,
+            voter=voter_profile
+        ).exists()
         return ctx

@@ -1,39 +1,50 @@
+{# templates/users/profile_detail.html #}
 {% extends "base.html" %}
 {% block content %}
   <div class="card mb-4">
     <div class="card-body">
-      {# 1 Use profile instead of object #}
-      <h3 class="card-title">{{ profile.user.username }}’s Profile</h3>
+
+      <h3>{{ profile.user.username }}’s Profile</h3>
 
       <div class="d-flex align-items-center mb-3">
-        <span class="me-3">{{ profile.user.username }}</span>
-        <span class="badge bg-info text-dark">
-          Reputation: {{ reputation_score }}
+        <span class="me-3">Reputation:</span>
+        <span id="reputation-score" class="badge bg-info text-dark">
+          {{ reputation_score }}
         </span>
       </div>
 
-      {# 2 Only show voting if it’s not your own profile #}
       {% if request.user != profile.user %}
-        <form method="post" action="{% url 'reputation:vote' %}" class="d-inline me-1">
-          {% csrf_token %}
-          <input type="hidden" name="profile_id" value="{{ profile.pk }}">
-          <input type="hidden" name="value" value="1">
-          <button type="submit" class="btn btn-sm btn-outline-success">
-            <i class="bi bi-hand-thumbs-up"></i>
-          </button>
-        </form>
-
-        <form method="post" action="{% url 'reputation:vote' %}" class="d-inline">
-          {% csrf_token %}
-          <input type="hidden" name="profile_id" value="{{ profile.pk }}">
-          <input type="hidden" name="value" value="-1">
-          <button type="submit" class="btn btn-sm btn-outline-danger">
-            <i class="bi bi-hand-thumbs-down"></i>
-          </button>
-        </form>
+        <div id="vote-buttons">
+          {% if not has_voted %}
+            <form method="post" action="{% url 'reputation:vote' %}" class="d-inline me-1">
+              {% csrf_token %}
+              <input type="hidden" name="profile_id" value="{{ profile.pk }}">
+              <input type="hidden" name="value" value="1">
+              <button class="btn btn-sm btn-outline-success">
+                <i class="bi bi-hand-thumbs-up"></i>
+              </button>
+            </form>
+            <form method="post" action="{% url 'reputation:vote' %}" class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="profile_id" value="{{ profile.pk }}">
+              <input type="hidden" name="value" value="-1">
+              <button class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-hand-thumbs-down"></i>
+              </button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'reputation:vote' %}">
+              {% csrf_token %}
+              <input type="hidden" name="profile_id" value="{{ profile.pk }}">
+              <input type="hidden" name="value" value="0">
+              <button class="btn btn-sm btn-outline-warning">
+                <i class="bi bi-arrow-counterclockwise"></i> Undo Vote
+              </button>
+            </form>
+          {% endif %}
+        </div>
       {% endif %}
 
-      {# 3 Edit button stays the same (only you can see it on your own profile) #}
       {% if request.user == profile.user %}
         <a href="{% url 'users:profile_edit' %}"
            class="btn btn-sm btn-outline-secondary ms-2">
