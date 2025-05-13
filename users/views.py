@@ -40,7 +40,20 @@ class ProfileView(LoginRequiredMixin, generic.DetailView):
          votes = self.object.votes.all()
          up_count   = votes.filter(upvote=True).count()
          down_count = votes.filter(upvote=False).count()
-         ctx['reputation_score'] = up_count - down_count
+         score = up_count - down_count
+         ctx['reputation_score'] = score
+
+         # ---- Tier logic ----
+         if score < 1:
+             tier, style = 'Novice', 'secondary'
+         elif score < 5:
+             tier, style = 'Intermediate', 'info'
+         elif score < 10:
+             tier, style = 'Advanced', 'primary'
+         else:
+             tier, style = 'Expert', 'success'
+         ctx['reputation_tier']       = tier
+         ctx['reputation_tier_class'] = f'badge bg-{style} text-white'
          return ctx
 
 class LogoutOnGetView(LogoutView):
@@ -68,7 +81,20 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         votes = self.object.votes.all()
         up   = votes.filter(upvote=True).count()
         down = votes.filter(upvote=False).count()
-        ctx['reputation_score'] = up - down
+        score = up - down
+        ctx['reputation_score'] = score
+
+        # ---- Tier logic ----
+        if score < 1:
+            tier, style = 'Novice', 'secondary'
+        elif score < 5:
+            tier, style = 'Intermediate', 'info'
+        elif score < 10:
+            tier, style = 'Advanced', 'primary'
+        else:
+            tier, style = 'Expert', 'success'
+        ctx['reputation_tier']       = tier
+        ctx['reputation_tier_class'] = f'badge bg-{style} text-white'
         # Has the logged-in user already voted on this profile?
         voter_profile = self.request.user.profile
         ctx['has_voted'] = Vote.objects.filter(

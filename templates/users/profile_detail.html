@@ -8,10 +8,18 @@
 
       <div class="d-flex align-items-center mb-3">
         <span class="me-3">Reputation:</span>
-        <span id="reputation-score" class="badge bg-info text-dark">
+
+        <!-- Numeric score -->
+        <span id="reputation-score" class="badge bg-info text-dark me-2">
           {{ reputation_score }}
         </span>
+
+        <!-- Tier badge -->
+        <span id="reputation-tier" class="{{ reputation_tier_class }}">
+          {{ reputation_tier }}
+        </span>
       </div>
+
 
       {% if request.user != profile.user %}
         <div id="vote-buttons">

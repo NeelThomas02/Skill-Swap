@@ -1,3 +1,4 @@
+{# templates/skills/matches.html #}
 {% extends "base.html" %}
 {% block content %}
   <h2 class="mb-4">Your Mutual Matches</h2>
@@ -5,15 +6,41 @@
   {% if mutual_matches %}
     <ul class="list-group">
       {% for match in mutual_matches %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-                  <a href="{% url 'users:detail' match.helper.pk %}">
-                    <strong>{{ match.helper.user.username }}</strong>
-                  </a>
-            for <em>{{ match.skill.name }}</em>
-          </div>
-          <a href="{% url 'chat:list' %}" class="btn btn-sm btn-primary">Chat</a>
-        </li>
+      
+        {% if match.helper.user == request.user %}
+          {# You are the helper, so show the seeker #}
+          {% with other=match.seeker %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <a href="{% url 'users:detail' other.pk %}">
+                  <strong>{{ other.user.username }}</strong>
+                </a>
+                <span class="badge bg-info text-white ms-1">
+                  {{ other.reputation_score }}
+                </span>
+                for <em>{{ match.skill.name }}</em>
+              </div>
+              <a href="{% url 'chat:list' %}" class="btn btn-sm btn-primary">Chat</a>
+            </li>
+          {% endwith %}
+        {% else %}
+          {# You are the seeker, so show the helper #}
+          {% with other=match.helper %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <a href="{% url 'users:detail' other.pk %}">
+                  <strong>{{ other.user.username }}</strong>
+                </a>
+                <span class="badge bg-info text-white ms-1">
+                  {{ other.reputation_score }}
+                </span>
+                for <em>{{ match.skill.name }}</em>
+              </div>
+              <a href="{% url 'chat:list' %}" class="btn btn-sm btn-primary">Chat</a>
+            </li>
+          {% endwith %}
+        {% endif %}
+
       {% endfor %}
     </ul>
   {% else %}

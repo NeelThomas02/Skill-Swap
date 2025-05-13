@@ -8,6 +8,9 @@ from .models import Skill, Match
 from django.urls import reverse
 from django.contrib import messages
 from notifications.models import Notification
+from django.views.generic import ListView
+from django.views.decorators.http import require_POST
+from django.db.models import Q
 
 # 1) List all skills
 class SkillListView(generic.ListView):
@@ -43,6 +46,12 @@ class SkillDetailView(LoginRequiredMixin, generic.DetailView):
         ctx['mutual_helpers'] = outgoing.intersection(incoming)
 
         return ctx
+    def get_queryset(self):
+    # prefetch each skill’s holders & their profiles
+        return Skill.objects.prefetch_related(
+            'holders__user',
+            'holders__votes',
+        )
 
 class RequestMatchView(LoginRequiredMixin, View):
     def post(self, request, pk, helper_pk):
@@ -83,3 +92,64 @@ class MutualMatchesView(LoginRequiredMixin, generic.TemplateView):
             helper_id__in=mutual_ids
         ).select_related('helper', 'skill')
         return ctx
+class MatchListView(ListView):
+    model = Match
+    template_name = 'skills/matches.html'
+    context_object_name = 'matches'
+
+    def get_queryset(self):
+        return Match.objects.select_related(
+            'skill',
+            'helper__user',
+            'seeker__user',
+        ).prefetch_related('helper__votes','seeker__votes')
+
+class PendingRequestsView(LoginRequiredMixin, ListView):
+    model = Match
+    template_name = 'skills/pending_requests.html'
+    context_object_name = 'requests'
+
+    def get_queryset(self):
+        me = self.request.user.profile
+        # all matches where I'm seeker or helper, but *not* mutual
+        qs = Match.objects.filter(
+            Q(seeker=me) | Q(helper=me)
+        )
+        # now exclude any that have the reciprocal counterpart
+        # e.g. (me→other) but not (other→me)
+        pending = []
+        for m in qs:
+            rev_exists = Match.objects.filter(
+                skill=m.skill,
+                seeker=m.helper,
+                helper=m.seeker
+            ).exists()
+            if not rev_exists:
+                pending.append(m.pk)
+        return Match.objects.filter(pk__in=pending).select_related('skill','seeker__user','helper__user')
+    
+@require_POST
+def cancel_request(request, pk):
+    m = get_object_or_404(Match, pk=pk, seeker=request.user.profile)
+    m.delete()
+    messages.success(request, "Your request has been cancelled.")
+    return redirect('skills:pending')
+
+@require_POST
+def accept_request(request, pk):
+    m = get_object_or_404(Match, pk=pk, helper=request.user.profile)
+    # create the reciprocal Match so it becomes “mutual”
+    Match.objects.get_or_create(
+        skill=m.skill,
+        seeker=request.user.profile,
+        helper=m.seeker
+    )
+    messages.success(request, "You’ve accepted the request!")
+    return redirect('skills:matches')
+
+@require_POST
+def decline_request(request, pk):
+    m = get_object_or_404(Match, pk=pk, helper=request.user.profile)
+    m.delete()
+    messages.success(request, "You’ve declined the request.")
+    return redirect('skills:pending')
