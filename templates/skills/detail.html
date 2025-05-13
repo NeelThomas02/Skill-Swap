@@ -7,7 +7,9 @@
       {% for holder in holders %}
         <div class="list-group-item d-flex justify-content-between align-items-center">
           <div>
-            <strong>{{ holder.user.username }}</strong>
+            <a href="{% url 'users:detail' holder.pk %}">
+              <strong>{{ holder.user.username }}</strong>
+            </a>
             <p class="mb-0 text-muted">{{ holder.bio|truncatechars:50 }}</p>
           </div>
           <div>

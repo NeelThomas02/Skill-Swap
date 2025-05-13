@@ -10,25 +10,6 @@
         Reputation: {{ reputation_score }}
       </span>
     </div>
-
-    <form method="post" action="{% url 'reputation:vote' %}" class="d-inline me-1">
-      {% csrf_token %}
-      <input type="hidden" name="profile_id" value="{{ object.pk }}">
-      <input type="hidden" name="value" value="1">
-      <button type="submit" class="btn btn-sm btn-outline-success">
-        <i class="bi bi-hand-thumbs-up"></i>
-      </button>
-    </form>
-
-    <form method="post" action="{% url 'reputation:vote' %}" class="d-inline">
-      {% csrf_token %}
-      <input type="hidden" name="profile_id" value="{{ object.pk }}">
-      <input type="hidden" name="value" value="-1">
-      <button type="submit" class="btn btn-sm btn-outline-danger">
-        <i class="bi bi-hand-thumbs-down"></i>
-      </button>
-    </form>
-
       <a href="{% url 'users:profile_edit' %}" class="btn btn-sm btn-outline-secondary ms-2">
         Edit Profile
       </a>

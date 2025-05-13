@@ -11,6 +11,11 @@ class VoteView(LoginRequiredMixin, View):
         profile_id = request.POST.get('profile_id')
         value      = int(request.POST.get('value'))  # +1 or -1
         profile    = get_object_or_404(Profile, pk=profile_id)
+        
+        # Prevent voting on yourself
+        if profile.user == request.user:
+            messages.error(request, "You cannot vote on your own profile.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
 
         # record or update the vote
         # map +1 → True (upvote), -1 → False (downvote)
@@ -29,4 +34,5 @@ class VoteView(LoginRequiredMixin, View):
         else:
             messages.info(request,
                           f"You changed your vote for {profile.user.username} to a {verb}.")
-        return redirect('users:profile')
+        return redirect(request.META.get('HTTP_REFERER',
+                                         f"/users/profile/{profile.pk}/"))

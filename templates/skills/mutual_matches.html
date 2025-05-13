@@ -7,7 +7,9 @@
       {% for match in mutual_matches %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
           <div>
-            <strong>{{ match.helper.user.username }}</strong>
+                  <a href="{% url 'users:detail' match.helper.pk %}">
+                    <strong>{{ match.helper.user.username }}</strong>
+                  </a>
             for <em>{{ match.skill.name }}</em>
           </div>
           <a href="{% url 'chat:list' %}" class="btn btn-sm btn-primary">Chat</a>

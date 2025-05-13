@@ -11,6 +11,7 @@ from .models import Profile
 from django.views import generic
 from .forms import ProfileForm
 from django.db import models
+from django.views.generic import DetailView
 
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
@@ -55,3 +56,16 @@ class ProfileUpdateView(LoginRequiredMixin, generic.UpdateView):
         # Ensure a Profile always exists
         profile, _ = Profile.objects.get_or_create(user=self.request.user)
         return profile
+
+class ProfileDetailView(LoginRequiredMixin, DetailView):
+    model = Profile
+    template_name = 'users/profile_detail.html'
+    context_object_name = 'profile'   # for clarity
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        votes = self.object.votes.all()
+        up   = votes.filter(upvote=True).count()
+        down = votes.filter(upvote=False).count()
+        ctx['reputation_score'] = up - down
+        return ctx
